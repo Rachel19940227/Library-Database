@@ -26,3 +26,16 @@ The Library Service Management System is a meticulously crafted database applica
 ### Intended Users
 All library members.
 
+## Front End
+We utilize Access for front-end development to craft interactive pages, created elements such as tables, forms, reports, and more. Our connection to the back-end database is facilitated through ODBC.
+![HomePage](image/Picture1.png)
+
+![HomePage](image/Picture2.png)
+
+![HomePage](image/Picture3.png)
+
+![HomePage](image/Picture4.png)
+
+## Back End
+For the backend, we rely on Oracle to manage the library database, employing triggers and sequences to update the interface dynamically. Staff members can utilize the frontend to add, modify, or delete data for all customers.
+![HomePage](image/Picture5.png)
