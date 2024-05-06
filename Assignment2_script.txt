@@ -1,0 +1,411 @@
+CREATE TABLESPACE assignment3
+DATAFILE 'assignment3.dat' SIZE 40M 
+ONLINE;
+
+-- Create Users
+CREATE USER Assignment3 IDENTIFIED BY 1234 ACCOUNT UNLOCK
+	DEFAULT TABLESPACE assignment3
+	QUOTA 20M ON assignment3;
+
+CREATE USER assignment3testUser IDENTIFIED BY testPassword ACCOUNT UNLOCK
+	DEFAULT TABLESPACE assignment3
+	QUOTA 5M ON assignment3;
+
+-- Create ROLES
+CREATE ROLE assignment3Admin;
+CREATE ROLE assignment3User;
+
+-- Grant PRIVILEGES
+GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE TRIGGER, CREATE PROCEDURE TO assignment3Admin;
+GRANT CONNECT, RESOURCE TO assignment3User;
+
+GRANT assignment3Admin TO Assignment3;
+GRANT assignment3User TO assignment3testUser;
+
+CONNECT Assignment3/1234;
+
+
+--Create tables
+--sequence
+CREATE SEQUENCE Fname_ID_seq
+START WITH 100
+INCREMENT BY 1
+NOMAXVALUE;
+
+CREATE SEQUENCE MemberID_ID_seq
+START WITH 100
+INCREMENT BY 1
+NOMAXVALUE;
+
+CREATE SEQUENCE NewMember_Fname_ID_seq
+START WITH 100
+INCREMENT BY 1
+NOMAXVALUE;
+
+CREATE TABLE FName (
+  FNameID INT DEFAULT Fname_ID_seq.NEXTVAL PRIMARY KEY,
+  FName VARCHAR(45) NOT NULL
+);
+
+CREATE TABLE NewMember (
+  MemberID INT DEFAULT MemberID_ID_seq.NEXTVAL PRIMARY KEY,
+  PhoneNumber CHAR(20) NULL,
+  Email VARCHAR(45) NULL,
+  LName VARCHAR(45) NULL,
+  Address VARCHAR(200) NULL,
+  Comments VARCHAR(200) NULL
+);
+
+CREATE TABLE NewMember_Fname_Association (
+    NewMember_Fname_ID INT DEFAULT NewMember_Fname_ID_seq.NEXTVAL PRIMARY KEY,
+    MemberID INT NOT NULL,
+    FNameid INT NOT NULL,
+    START_DATE TIMESTAMP NULL,
+    END_DATE TIMESTAMP NULL,
+    Comments VARCHAR(200) NULL,
+    FOREIGN KEY (MemberID) REFERENCES NewMember(MemberID),
+    FOREIGN KEY (FNameid) REFERENCES FName(FNameid)
+);
+
+
+
+--sequence
+CREATE SEQUENCE GenreInfo_NewGenres_Association_seq
+START WITH 1
+INCREMENT BY 1
+NOMAXVALUE;
+
+CREATE TABLE NewGenres (
+  GenreID INT NOT NULL,
+  GenreName VARCHAR2(45) NULL,
+  CONSTRAINT pk_NewGenres PRIMARY KEY (GenreID)
+);
+
+CREATE TABLE GenreInfo (
+  GenreInfoID INT NOT NULL,
+  GenreInfo VARCHAR2(45) NOT NULL,
+  CONSTRAINT pk_GenreInfo PRIMARY KEY (GenreInfoID)
+);
+
+CREATE TABLE GenreInfo_NewGenres_Association (
+  GenreInfoID INT NOT NULL,
+  GenreID INT NOT NULL,
+  StartTime TIMESTAMP NULL,
+  EndTime TIMESTAMP,
+  GenreInfo_NewGenresID INT DEFAULT GenreInfo_NewGenres_Association_seq.NEXTVAL,
+  CONSTRAINT pk_GenreInfo_NewGenres PRIMARY KEY (GenreInfo_NewGenresID),
+  CONSTRAINT fk_GenreInfo_has_NewGenres_GenreInfo1 FOREIGN KEY (GenreInfoID)
+    REFERENCES GenreInfo (GenreInfoID),
+  CONSTRAINT fk_GenreInfo_has_NewGenres_NewGenres1 FOREIGN KEY (GenreID)
+    REFERENCES NewGenres (GenreID)
+);
+
+CREATE TABLE Author (
+  AuthorID INT NOT NULL,
+  FirstName VARCHAR(45) NOT NULL,
+  LastName VARCHAR(45) NOT NULL,
+  BirthDate DATE,
+  DeathDate DATE,
+  Gender CHAR(10),
+  PRIMARY KEY (AuthorID)
+);
+
+CREATE TABLE Book (
+  BookID INT NOT NULL,
+  ISBN VARCHAR(45) NOT NULL,
+  BookTitle VARCHAR(200) NOT NULL,
+  AuthorID INT NOT NULL,
+  Copies INT NOT NULL,
+  GenreID INT NOT NULL,
+  PublisherID INT NOT NULL,
+  PRIMARY KEY (BookID),
+  CONSTRAINT fk_BookTable_Genres_Table
+    FOREIGN KEY (GenreID)
+    REFERENCES NewGenres (GenreID),
+  CONSTRAINT fk_BookTable_Author
+    FOREIGN KEY (AuthorID)
+    REFERENCES Author (AuthorID)
+);
+
+
+
+CREATE TABLE Transaction (
+  MemberID INT NOT NULL,
+  BookID INT NOT NULL,
+  TransactionID INT NOT NULL,
+  CheckoutDate DATE NOT NULL,
+  ReturnDate DATE NOT NULL,
+  PRIMARY KEY (TransactionID),
+  CONSTRAINT fk_Transaction_Member
+    FOREIGN KEY (MemberID)
+    REFERENCES NewMember (MemberID),
+  CONSTRAINT fk_Transaction_Book
+    FOREIGN KEY (BookID)
+    REFERENCES Book (BookID)
+); 
+
+
+CREATE TABLE Supervisor (
+  SupervisorID INT NOT NULL,
+  FirstName VARCHAR(45) NOT NULL,
+  LastName VARCHAR(45) NOT NULL,
+  PhoneNumber CHAR(10) NOT NULL,
+  Email VARCHAR(45) NOT NULL,
+  Gender CHAR(10),
+  Position CHAR(10),
+  PRIMARY KEY (SupervisorID)
+);
+
+CREATE TABLE Staffs (
+  StaffID INT NOT NULL,
+  FirstName VARCHAR(45) NOT NULL,
+  LastName VARCHAR(45) NOT NULL,
+  PhoneNumber CHAR(20) NOT NULL,
+  Email VARCHAR(45) NOT NULL,
+  Gender CHAR(10),
+  Position CHAR(10),
+  SupervisorID INT NOT NULL,
+  PRIMARY KEY (StaffID, SupervisorID),
+  CONSTRAINT fk_Staffs_Supervisor1
+    FOREIGN KEY (SupervisorID)
+    REFERENCES Supervisor (SupervisorID)
+);
+
+--insert NEWmember table
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('123400', 'alice@gmail.com', 'Wang', '1 Deerfield Dr');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('123453', 'ryan@gmail.com', 'Smith', '10 Smyth Road');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('123456', 'jiji@gmail.com', 'Huan', '2 Deerfield Dr');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('876438', 'bob@gmail.com', 'Smith', '789 Maple Avenue');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('765342', 'emily@hotmail.com', 'Brown', '332 Cedar Street');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('443222', 'ali@hotmail.com', 'Johnson', '345 Oak Street');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('987893', 'david@gmail.com', 'Wilson', '2 Pine Road');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('345333', 'claire@gmail.com', 'Davis', '345 Pine Road');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('888787', 'frank@hotmail.com', 'Miller', '32 Maple Avenue');
+INSERT INTO NewMember (PhoneNumber, Email, LName, Address) VALUES ('989760', 'jack@hotmail.com', 'Anderson', '987 Smyth Road');
+
+--insert Fname
+INSERT INTO FName (FName) VALUES ('Alice');
+INSERT INTO FName (FName) VALUES ('Ryan');
+INSERT INTO FName (FName) VALUES ('Jiji');
+INSERT INTO FName (FName) VALUES ('Bob');
+INSERT INTO FName (FName) VALUES ('Emily');
+INSERT INTO FName (FName) VALUES ('Ali');
+INSERT INTO FName (FName) VALUES ('David');
+INSERT INTO FName (FName) VALUES ('Claire');
+INSERT INTO FName (FName) VALUES ('Frank');
+INSERT INTO FName (FName) VALUES ('Jack');
+
+--insert association table NewMember_Fname_Association
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (100, 100, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (101, 101, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (102, 102, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (103, 103, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (104, 104, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (105, 105, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (106, 106, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (107, 107, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (108, 108, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+INSERT INTO NewMember_Fname_Association (MemberID, FNameid, START_DATE, END_DATE) 
+VALUES (109, 109, TIMESTAMP '2024-04-03 00:00:00', NULL);
+
+
+
+--insert table GenreInfo
+INSERT INTO GenreInfo (GenreInfoId, GenreInfo) VALUES (1, 'detective fiction');
+INSERT INTO GenreInfo (GenreInfoId, GenreInfo) VALUES (2, 'Fantasy novels');
+INSERT INTO GenreInfo (GenreInfoId, GenreInfo) VALUES (3, 'covers fiction');
+INSERT INTO GenreInfo (GenreInfoId, GenreInfo) VALUES (4, 'Science fiction');
+INSERT INTO GenreInfo (GenreInfoId, GenreInfo) VALUES (5, 'Romance subplot');
+INSERT INTO GenreInfo (GenreInfoId, GenreInfo) VALUES (6, 'written with readers');
+
+
+--insert table NewGenres
+INSERT INTO NewGenres (GenreID, GenreName) VALUES (660001, 'Mystery');
+INSERT INTO NewGenres (GenreID, GenreName) VALUES (660002, 'Fantasy');
+INSERT INTO NewGenres (GenreID, GenreName) VALUES (660003, 'History');
+INSERT INTO NewGenres (GenreID, GenreName) VALUES (660004, 'ScienceFiction');
+INSERT INTO NewGenres (GenreID, GenreName) VALUES (660005, 'Romance');
+INSERT INTO NewGenres (GenreID, GenreName) VALUES (660007, 'Children');
+
+--insert association table GenreInfo_NewGenres_Association
+INSERT INTO GenreInfo_NewGenres_Association (GenreInfoID, GenreID, StartTime, EndTime, GenreInfo_NewGenresID) VALUES (1, 660001, TIMESTAMP '2024-04-04 00:00:00', NULL, GenreInfo_NewGenres_Association_seq.NEXTVAL);
+INSERT INTO GenreInfo_NewGenres_Association (GenreInfoID, GenreID, StartTime, EndTime, GenreInfo_NewGenresID) VALUES (2, 660002, TIMESTAMP '2024-04-04 00:00:00', NULL, GenreInfo_NewGenres_Association_seq.NEXTVAL);
+INSERT INTO GenreInfo_NewGenres_Association (GenreInfoID, GenreID, StartTime, EndTime, GenreInfo_NewGenresID) VALUES (3, 660003, TIMESTAMP '2024-04-04 00:00:00', NULL, GenreInfo_NewGenres_Association_seq.NEXTVAL);
+INSERT INTO GenreInfo_NewGenres_Association (GenreInfoID, GenreID, StartTime, EndTime, GenreInfo_NewGenresID) VALUES (4, 660004, TIMESTAMP '2024-04-04 00:00:00', NULL, GenreInfo_NewGenres_Association_seq.NEXTVAL);
+INSERT INTO GenreInfo_NewGenres_Association (GenreInfoID, GenreID, StartTime, EndTime, GenreInfo_NewGenresID) VALUES (5, 660005, TIMESTAMP '2024-04-04 00:00:00', NULL, GenreInfo_NewGenres_Association_seq.NEXTVAL);
+INSERT INTO GenreInfo_NewGenres_Association (GenreInfoID, GenreID, StartTime, EndTime, GenreInfo_NewGenresID) VALUES (6, 660007, TIMESTAMP '2024-04-04 00:00:00', NULL, GenreInfo_NewGenres_Association_seq.NEXTVAL);
+
+INSERT INTO Author (AuthorID, FirstName, LastName, BirthDate, DeathDate, Gender)
+SELECT 35010, 'Rowling', 'J. K', TO_DATE('1965-07-31', 'YYYY-MM-DD'), NULL, 'Female' FROM dual UNION ALL
+SELECT 35011, 'Stephenie', 'Meyer', TO_DATE('1973-12-24', 'YYYY-MM-DD'), NULL, 'Female' FROM dual UNION ALL
+SELECT 35012, 'John', 'Keay', TO_DATE('1941-09-18', 'YYYY-MM-DD'), NULL, 'Male' FROM dual UNION ALL
+SELECT 35013, 'Craig', 'Donaghy', NULL, NULL, 'Male' FROM dual UNION ALL
+SELECT 35014, 'Stephen', 'King', TO_DATE('1947-09-21', 'YYYY-MM-DD'), NULL, 'Male' FROM dual UNION ALL
+SELECT 35015, 'Virginia', 'Woolf', NULL, TO_DATE('1941-03-28', 'YYYY-MM-DD'), 'Female' FROM dual UNION ALL
+SELECT 35016, 'Victor', 'Hugo', TO_DATE('1802-02-26', 'YYYY-MM-DD'), TO_DATE('1885-05-22', 'YYYY-MM-DD'), 'Male' FROM dual UNION ALL
+SELECT 35017, 'Franz', 'Kafka', TO_DATE('1802-02-26', 'YYYY-MM-DD'), TO_DATE('1924-06-03', 'YYYY-MM-DD'), 'Male' FROM dual UNION ALL
+SELECT 35018, 'Elena', 'Ferrante', TO_DATE('1943-10-18', 'YYYY-MM-DD'), NULL, 'Female' FROM dual UNION ALL
+SELECT 35019, 'Bonnie', 'Garmus', TO_DATE('1957-04-18', 'YYYY-MM-DD'), NULL, 'Female' FROM dual UNION ALL
+SELECT 35020, 'Jingfang', 'Hao', TO_DATE('1984-07-27', 'YYYY-MM-DD'), NULL, 'Female' FROM dual;
+
+INSERT INTO Book (BookID, ISBN, BookTitle, AuthorID, Copies, GenreID, PublisherID) VALUES (550001, '9781338878950', 'Harry Potter and the Sorcerer''s Stone', 35010, 3, 660007, 770001);
+INSERT INTO Book (BookID, ISBN, BookTitle, AuthorID, Copies, GenreID, PublisherID) VALUES (550002, '9780316327336', 'Twilight', 35011, 5, 660005, 770003);
+INSERT INTO Book (BookID, ISBN, BookTitle, AuthorID, Copies, GenreID, PublisherID) VALUES (550003, '9780465025183', 'China: A History', 35012, 2, 660003, 770002);
+INSERT INTO Book (BookID, ISBN, BookTitle, AuthorID, Copies, GenreID, PublisherID) VALUES (550004, '9781405952323', 'Doctor Who: A Short History of Everyone', 35013, 4, 660004, 770004);
+INSERT INTO Book (BookID, ISBN, BookTitle, AuthorID, Copies, GenreID, PublisherID) VALUES (550005, '9781338878950', 'Harry Potter and the Goblet of Fire', 35010, 5, 660007, 770001);
+INSERT INTO Book (BookID, ISBN, BookTitle, AuthorID, Copies, GenreID, PublisherID) VALUES (550006, '9781338878936', 'Harry Potter and the Chamber of Secrets', 35010, 3, 660007, 770001);
+
+
+INSERT INTO Transaction (TransactionID, CheckoutDate, ReturnDate, MemberID, BookID) VALUES (10000420, TO_DATE('2023-01-15', 'YYYY-MM-DD'), TO_DATE('2023-01-20', 'YYYY-MM-DD'), 100, 550003);
+INSERT INTO Transaction (TransactionID, CheckoutDate, ReturnDate, MemberID, BookID) VALUES (10001011, TO_DATE('2023-01-16', 'YYYY-MM-DD'), TO_DATE('2023-01-21', 'YYYY-MM-DD'), 101, 550004);
+INSERT INTO Transaction (TransactionID, CheckoutDate, ReturnDate, MemberID, BookID) VALUES (10001012, TO_DATE('2023-01-17', 'YYYY-MM-DD'), TO_DATE('2023-01-22', 'YYYY-MM-DD'), 102, 550005);
+INSERT INTO Transaction (TransactionID, CheckoutDate, ReturnDate, MemberID, BookID) VALUES (10004013, TO_DATE('2023-01-18', 'YYYY-MM-DD'), TO_DATE('2023-01-23', 'YYYY-MM-DD'), 103, 550001);
+INSERT INTO Transaction (TransactionID, CheckoutDate, ReturnDate, MemberID, BookID) VALUES (10005014, TO_DATE('2023-01-19', 'YYYY-MM-DD'), TO_DATE('2023-01-24', 'YYYY-MM-DD'), 104, 550004);
+INSERT INTO Transaction (TransactionID, CheckoutDate, ReturnDate, MemberID, BookID) VALUES (10006015, TO_DATE('2023-01-20', 'YYYY-MM-DD'), TO_DATE('2023-01-25', 'YYYY-MM-DD'), 105, 550006);
+INSERT INTO Transaction (TransactionID, CheckoutDate, ReturnDate, MemberID, BookID) VALUES (10006016, TO_DATE('2023-01-21', 'YYYY-MM-DD'), TO_DATE('2023-01-26', 'YYYY-MM-DD'), 106, 550004);
+
+INSERT INTO Supervisor (SupervisorID, FirstName, LastName, PhoneNumber, Email, Gender, Position) VALUES (1, 'John', 'Doe', '1234567890', 'john@example.com', 'Male', 'Manager');
+INSERT INTO Supervisor (SupervisorID, FirstName, LastName, PhoneNumber, Email, Gender, Position) VALUES(2, 'Jane', 'Smith', '9876543210', 'jane@example.com', 'Female', 'Supervisor');
+INSERT INTO Supervisor (SupervisorID, FirstName, LastName, PhoneNumber, Email, Gender, Position) VALUES(3, 'Michael', 'Johnson', '4567890123', 'michael@example.com', 'Male', 'Assistant');
+INSERT INTO Supervisor (SupervisorID, FirstName, LastName, PhoneNumber, Email, Gender, Position) VALUES(4, 'Emily', 'Williams', '7890123456', 'emily@example.com', 'Female', 'Cordinator');
+INSERT INTO Supervisor (SupervisorID, FirstName, LastName, PhoneNumber, Email, Gender, Position) VALUES(5, 'David', 'Brown', '2345678901', 'david@example.com', 'Male', 'Director');
+
+
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5010, 'John', 'Doe', '1234567890', 'john.doe@email.com', 'Male', 'Librarian', 1);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5011, 'Jane', 'Smith', '9876543210', 'jane.smith@email.com', 'Female', 'Assistant', 2);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5012, 'Michael', 'Johnson', '5551234567', 'michael.johnson@email.com', 'Male', 'Clerk', 3);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5013, 'Emma', 'Brown', '5559876543', 'emma.brown@email.com', 'Female', 'Librarian', 4);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5014, 'David', 'Wilson', '5554567890', 'david.wilson@email.com', 'Male', 'Assistant', 5);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5015, 'Olivia', 'Taylor', '5552345678', 'olivia.taylor@email.com', 'Female', 'Clerk', 1);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5016, 'Robert', 'Jones', '5558765432', 'robert.jones@email.com', 'Male', 'Librarian', 2);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5017, 'Sophia', 'Davis', '5553456789', 'sophia.davis@email.com', 'Female', 'Assistant', 2);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5018, 'William', 'Miller', '5556543210', 'william.miller@email.com', 'Male', 'Clerk', 3);
+INSERT INTO Staffs (StaffID, FirstName, LastName, Phonenumber, Email, Gender, Position, SupervisorID) VALUES(5019, 'Ava', 'Moore', '5554321098', 'ava.moore@email.com', 'Female', 'Librarian', 4);
+
+--Create view
+CREATE VIEW newmember_fname AS
+SELECT nm.MemberID, nm.PhoneNumber, nm.Email, nm.LName, nm.Address, fn.FName
+FROM NewMember nm
+JOIN NewMember_Fname_Association nfa ON nm.MemberID = nfa.MemberID
+JOIN FName fn ON nfa.FNameid = fn.FNameID
+where (nfa.End_Date is NULL);
+
+--sequnences
+CREATE SEQUENCE new_member_fnameid1_sequence
+  START WITH 10
+  INCREMENT BY 1
+  NOMAXVALUE;
+
+CREATE SEQUENCE new_memberid1_sequence
+  START WITH 10
+  INCREMENT BY 1
+  NOMAXVALUE;
+
+
+CREATE SEQUENCE new_fnameid1_sequence
+  START WITH 10
+  INCREMENT BY 1
+  NOMAXVALUE;
+  
+  --Create trigger
+CREATE OR REPLACE TRIGGER tri_newmember_fname 
+INSTEAD OF INSERT OR UPDATE OR DELETE ON newmember_fname
+FOR EACH ROW
+	DECLARE
+		v_member_fname_id INT;
+		v_memberid INT;
+		v_fnameid INT;
+BEGIN
+
+IF INSERTING THEN
+	BEGIN
+		select new_memberid1_sequence.NEXTVAL INTO  v_memberid FROM DUAL;
+		insert into NewMember (MemberID, PhoneNumber, Email, LName, Address) VALUES (v_memberid, :NEW.PhoneNumber, :NEW.Email, :NEW.LName, :NEW.Address);
+
+		SELECT new_fnameid1_sequence.NEXTVAL into v_fnameid FROM DUAL;
+		insert into FName (FNameID, FName) VALUES (v_fnameid, :NEW.FName);
+
+		SELECT new_member_fnameid1_sequence.NEXTVAL INTO v_member_fname_id FROM DUAL;
+		INSERT INTO NewMember_Fname_Association (NewMember_Fname_ID, MemberID, FNameid, START_DATE) VALUES (v_member_fname_id, v_memberid, v_fnameid, SYSDATE);
+	
+	END;
+END IF;
+
+IF UPDATING THEN
+
+	BEGIN
+--        SELECT new_fnameid1_sequence.NEXTVAL into v_fnameid FROM DUAL;
+        SELECT NF.FNameid INTO v_fnameid
+        FROM NewMember_Fname_Association NF
+        JOIN FName F ON NF.FNameid = F.FNameID
+        WHERE NF.MemberID = :OLD.MemberID AND NF.END_DATE IS NULL;
+		UPDATE NewMember
+		SET PhoneNumber = :NEW.PhoneNumber,
+			Email = :NEW.Email,
+			LName = :NEW.LName,
+			Address = :NEW.Address
+		WHERE MemberID = :OLD.MemberID;
+        
+        update Fname
+        set Fname =  :NEW.FName
+        where FNameID = v_fnameid;
+		
+        UPDATE NewMember_Fname_Association
+		SET END_DATE = SYSDATE
+		WHERE MemberID = :OLD.MemberID AND END_DATE IS NULL;
+	    INSERT INTO NewMember_Fname_Association ( MemberID, FNameid, START_DATE) VALUES (:OLD.MemberID, v_fnameid, SYSDATE);
+
+    END;
+END IF;
+
+IF DELETING THEN 
+	BEGIN
+		SELECT NF.FNameid INTO v_fnameid
+		FROM NewMember_Fname_Association NF
+		JOIN FName F ON NF.FNameid = F.FNameID
+		WHERE NF.MemberID = :OLD.MemberID AND NF.END_DATE IS NULL;
+
+		DELETE FROM NewMember_Fname_Association WHERE MemberID = :OLD.MemberID;
+		DELETE FROM FName WHERE FNameID = v_fnameid;
+        UPDATE NewMember
+        SET comments = 'delete'
+        WHERE  MemberID = :OLD.MemberID;
+	END;
+
+END IF;
+END;
+/
+commit;	
+
+-- Drop all tables
+DROP TABLE Staffs;
+DROP TABLE Supervisor;
+DROP TABLE GenreInfo_NewGenres_Association;
+DROP TABLE GenreInfo;
+DROP TABLE Transaction;
+DROP TABLE Book;
+DROP TABLE NewGenres;
+DROP TABLE NewMember_Fname_Association;
+DROP TABLE Author;
+DROP TABLE FName;
+DROP TABLE NewMember;
+DROP SEQUENCE NewMember_Fname_ID_seq;
+DROP SEQUENCE GenreInfo_NewGenres_Association_seq;
