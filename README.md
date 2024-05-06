@@ -6,7 +6,7 @@ The Library Service Management System is a meticulously crafted database applica
 
 ## Main Features
 ### Tables
-![Data Model Diagram](image/Data_Model_Diagram.png)
+![Data Model Diagram](image/Data_Model_Diagram.png){:height="30%" width="30%"}
 1.	FName Table: Stores first names with a unique identifier (FNameID) as the primary key.
 2.	NewMember Table: Contains information about new members, including MemberID, PhoneNumber, Email, Last Name (LName), and Address.
 3.	NewMember_Fname_Association Table: Manages the association between new members and first names.
